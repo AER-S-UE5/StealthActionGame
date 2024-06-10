@@ -7,19 +7,6 @@
 #include "StealthActionGame/TimeManipulation/SATimeRecorder.h"
 #include "SACharacterTimeRecorder.generated.h"
 
-USTRUCT(BlueprintType)
-struct STEALTHACTIONGAME_API FCharacterTimeState : public  FTimeState
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere)
-	FVector Location;
-	UPROPERTY(EditAnywhere)
-	FRotator Rotation;
-	
-	//virtual bool operator==(const FCharacterTimeState&) const;
-	
-};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -34,16 +21,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TArray<FCharacterTimeState> GetCharacterTimeStates();
 
-
+	UFUNCTION()
 	virtual void RecordState() override;
+
+	virtual void StartRecorder() override;
+	virtual void StopRecorder() override;
+	
 
 protected:
 	
 	UPROPERTY(EditDefaultsOnly,Category="Settings")
 	float MaxRecordTime = 5.f;
 
-	UPROPERTY(EditAnywhere,Category="TimeStateRecording", meta=(AllowPrivateAccess = "true"))
-	TArray<FCharacterTimeState> CharacterTimeStates;
+	TObjectPtr<USkeletalMeshComponent> Mesh;
 	// Called when the game starts
 	virtual void BeginPlay() override;
 

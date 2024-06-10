@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "SACharacter.generated.h"
 
+class UPoseableMeshComponent;
+class USACharacterTimeRewinder;
 class USACharacterTimeRecorder;
 
 UCLASS()
@@ -17,12 +19,25 @@ public:
 	// Sets default values for this character's properties
 	ASACharacter();
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsRewinding;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere)
+	UPoseableMeshComponent* PoseableMesh;
+
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USACharacterTimeRecorder> TimeRecorder;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USACharacterTimeRewinder> TimeRewinder;
+
+	UFUNCTION(BlueprintCallable)
+	void RunRewindAbility();
+	
 
 public:	
 	// Called every frame

@@ -3,24 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TimeStateStructs.h"
 #include "GameFramework/GameStateBase.h"
-#include "SATimeRecorder.generated.h"
-
-USTRUCT(BlueprintType)
-struct STEALTHACTIONGAME_API FTimeState
-{
-	GENERATED_BODY();
-
-	UPROPERTY(EditAnywhere)
-	float RecordTime;
-	
-	virtual ~FTimeState() = default;
-	//bool operator==(const FTimeState&) const;
-};
-
-/**
- * 
- */
 
 template <typename T= FTimeState>
 class STEALTHACTIONGAME_API SATimeRecorder 
@@ -32,6 +16,9 @@ public:
 	virtual ~SATimeRecorder();
 
 	virtual void RecordState();
+
+	virtual void StartRecorder();
+	virtual void StopRecorder();
 	TArray<T> GetTimeStates();
 
 protected:
@@ -43,9 +30,12 @@ protected:
 	
 	TArray<T> TimeStates;
 
+	UPROPERTY()
 	AGameStateBase* GameState;
 
 	bool bIsRecording;
+
+	FTimerHandle RecordingTimerHandle;
 
 private:
 	void RemoveUnwantedState();
@@ -70,8 +60,20 @@ void SATimeRecorder<T>::RecordState()
 	T NewState ;
 	FillTimeState(NewState);
 	NewState.RecordTime = GameState->GetServerWorldTimeSeconds();
-	TimeStates.Insert(NewState,0);
+	TimeStates.Add(NewState);
 	RemoveUnwantedState();
+}
+
+template <typename T>
+void SATimeRecorder<T>::StartRecorder()
+{
+	bIsRecording = true;
+}
+
+template <typename T>
+void SATimeRecorder<T>::StopRecorder()
+{
+	bIsRecording = false;
 }
 
 template <typename T>
@@ -82,7 +84,6 @@ template <typename T>
 void SATimeRecorder<T>::RemoveUnwantedState()
 {
 	if(TimeStates.Num()<=0) return;
-	T* LastState = &TimeStates[TimeStates.Num()-1];
-	if(GameState->GetServerWorldTimeSeconds() -LastState->RecordTime >MaxRecordTime) TimeStates.Pop();
-	LastState =nullptr;
+	const auto LastState = TimeStates[0];
+	if(GameState->GetServerWorldTimeSeconds() -LastState.RecordTime >MaxRecordTime) TimeStates.RemoveAt(0);
 }
